@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Arduino Ui</h1>
+
+<fieldset>
+    <legend>연결 포트 입력</legend>
+    <input class="com_port">
+    <button class="conn_btn">CONN</button>
+</fieldset>
+
+<fieldset style="width:200px;">
+    <legend>LED</legend>
+    <button class="led_on">LED ON</button>
+
+    <button class="led_off">LED OFF</button>
+</fieldset>
+
+<div style="display:flex;">
+    <fieldset style="width:100px;">
+        <legend>LED ON/OFF</legend>
+        <span class="led_info"></span>
+    </fieldset>
+    <fieldset style="width:100px;">
+        <legend>온도 센서</legend>
+        <span class="tmp_info"></span>
+    </fieldset>
+    <fieldset style="width:100px;">
+        <legend>조도 센서</legend>
+        <span class="light_info"></span>
+    </fieldset>
+    <fieldset style="width:100px;">
+        <legend>초음파 센서</legend>
+        <span class="dis_info"></span>
+    </fieldset>
+</div>
+
+
+<!--axios cdn-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js" integrity="sha512-aoTNnqZcT8B4AmeCFmiSnDlc4Nj/KPaZyB5G7JnOnUEkdNpCZs1LCankiYi01sLTyWy+m2P+W4XM+BuQ3Q4/Dg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    const led_on_btn = document.querySelector('.led_on');
+    const led_off_btn = document.querySelector('.led_off');
+    const conn_btn = document.querySelector('.conn_btn');
+
+    const led_info_el = document.querySelector('.led_info');
+    const tmp_info_el = document.querySelector('.tmp_info');
+    const light_info_el = document.querySelector('.light_info');
+    const dis_info_el = document.querySelector('.dis_info');
+
+    const messageInterval=null;
+
+    //데이터 꺼내기
+    const req_led_info_func = ()=>{
+        axios.get('http://localhost:8080/arduino/ui/led')
+        .then(respones=>{
+        led_info_el.innerHTML = respones.data;
+        })
+        .catch(error=>{})
+    }
+    const req_tmp_info_func = ()=>{
+        axios.get('http://localhost:8080/arduino/ui/tmp')
+        .then(respones=>{
+        tmp_info_el.innerHTML = respones.data;
+        })
+        .catch(error=>{})
+    }
+    const req_light_info_func = ()=>{
+        axios.get('http://localhost:8080/arduino/ui/light')
+        .then(respones=>{
+        light_info_el.innerHTML = respones.data;
+        })
+        .catch(error=>{})
+    }
+    const req_dis_info_func = ()=>{
+        axios.get('http://localhost:8080/arduino/ui/dis')
+        .then(respones=>{
+        dis_info_el.innerHTML = respones.data;
+        })
+        .catch(error=>{})
+    }
+
+
+     //데이터 출력
+    conn_btn.addEventListener('click',function(){
+        const port = document.querySelector('.com_port').value;
+        axios.get(`/arduino/conn/${port}`)
+        .then(response=>{
+            console.log(response.status);
+            if(response.status == 200){
+
+            if(messageInterval!=null){
+                    clearInterval(messageInterval); //기존 요청 반복 제거
+                  }
+
+            messageInterval = setInterval(()=>{
+                req_led_info_func();
+                req_tmp_info_func();
+                req_light_info_func();
+                req_dis_info_func();
+
+            },1000);
+           }
+        })
+        .catch(error=>{
+
+        })
+    });
+
+
+    //LED 제어
+    led_on_btn.addEventListener('click',function(){
+        axios.get('/arduino/led/1')
+        .then(response=>{
+
+        })
+        .catch(error=>{
+
+        })
+    });
+    led_off_btn.addEventListener('click',function(){
+        axios.get('/arduino/led/0')
+        .then(response=>{
+
+        })
+        .catch(error=>{
+
+        })
+    });
+
+
+
+
+
+</script>
+
+
+</body>
+</html>
